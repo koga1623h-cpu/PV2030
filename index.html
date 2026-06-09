@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>通信業務プレゼン 統合ラフ</title>
+<style>
+  :root{--navy:#0A2342;--accent:#5BB3E4;--light:#E6F1FB;--pale:#CAE0F7;--dark:#0A0A0A;--grey:#888780;--green:#3F9D6B;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#e9edf2;font-family:"Yu Gothic","YuGothic","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;color:var(--dark);padding:40px 16px 80px;}
+  .head{max-width:960px;margin:0 auto 30px;text-align:center;color:var(--navy);}
+  .head h1{font-size:21px;letter-spacing:.03em;}
+  .head p{font-size:13px;color:var(--grey);margin-top:8px;}
+  .deck{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:28px;}
+  .slide{position:relative;aspect-ratio:16/9;background:#fff;border-radius:10px;box-shadow:0 8px 28px rgba(10,35,66,.14);padding:42px 50px;overflow:hidden;}
+  .num{position:absolute;top:18px;right:24px;font-size:12px;color:var(--grey);letter-spacing:.1em;}
+  .kicker{font-size:12px;color:var(--accent);font-weight:700;letter-spacing:.12em;margin-bottom:10px;}
+  .title{font-size:28px;color:var(--navy);font-weight:700;line-height:1.3;}
+  .sub{font-size:14px;color:var(--grey);margin-top:8px;}
+  .body{margin-top:22px;font-size:15px;line-height:1.85;color:#222;}
+  .body li{margin-left:1.1em;margin-bottom:5px;}
+  .ph{background:#fff6d6;color:#8a6d00;border:1px dashed #d9b441;padding:0 6px;border-radius:4px;font-size:.9em;}
+  .src{position:absolute;bottom:12px;left:50px;font-size:10px;color:#b9c2cc;}
+
+  .cover{background:var(--navy);color:#fff;display:flex;flex-direction:column;justify-content:center;}
+  .cover .title{color:#fff;font-size:34px;}
+  .cover .sub{color:var(--pale);font-size:15px;margin-top:16px;}
+  .bar{width:60px;height:5px;background:var(--accent);margin:20px 0;}
+
+  .agenda{margin-top:26px;}
+  .agenda .row{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid #eef2f7;}
+  .agenda .ic{font-size:23px;min-width:34px;text-align:center;}
+  .agenda .row span.t{font-size:18px;color:var(--navy);font-weight:600;}
+  .agenda small{color:var(--grey);font-size:13px;font-weight:400;margin-left:6px;}
+
+  .stats{display:flex;gap:22px;margin-top:24px;flex-wrap:wrap;}
+  .stat{background:var(--light);border-radius:8px;padding:20px 24px;flex:1;min-width:150px;}
+  .stat .big{font-size:38px;color:var(--navy);font-weight:800;line-height:1;}
+  .stat .unit{font-size:15px;color:var(--accent);font-weight:700;margin-left:3px;}
+  .stat .lbl{font-size:12px;color:var(--grey);margin-top:8px;}
+
+  .flow{display:flex;align-items:stretch;margin-top:24px;flex-wrap:wrap;}
+  .step{flex:1;min-width:140px;background:var(--light);border-radius:8px;padding:15px;font-size:14px;color:var(--navy);font-weight:600;line-height:1.5;}
+  .arrow{display:flex;align-items:center;color:var(--accent);font-size:20px;padding:0 9px;font-weight:800;}
+
+  .cols{display:flex;gap:20px;margin-top:20px;}
+  .col{flex:1;background:var(--light);border-radius:8px;padding:18px 20px;}
+  .col h4{color:var(--navy);font-size:16px;margin-bottom:8px;}
+  .col p{font-size:13.5px;line-height:1.7;color:#333;}
+
+  .barrow{display:flex;align-items:center;gap:14px;margin-top:14px;}
+  .barrow .nm{width:180px;font-size:14px;color:var(--navy);font-weight:600;}
+  .track{flex:1;height:20px;background:#eef2f7;border-radius:10px;overflow:hidden;}
+  .fill{height:100%;background:var(--accent);border-radius:10px;}
+  .pct{width:48px;text-align:right;font-weight:800;color:var(--navy);}
+
+  /* タイムライン */
+  .tl{display:flex;align-items:center;margin-top:22px;background:var(--light);border-radius:8px;padding:18px 20px;}
+  .tl .pt{flex:1;text-align:center;}
+  .tl .dot{width:13px;height:13px;border-radius:50%;background:var(--accent);margin:0 auto 8px;}
+  .tl .dot.hl{background:var(--navy);width:17px;height:17px;}
+  .tl .lbl{font-size:13px;color:var(--navy);font-weight:700;}
+  .tl .dsc{font-size:11px;color:var(--grey);margin-top:3px;}
+  .tl .ln{height:2px;background:var(--pale);flex:1;margin-bottom:24px;}
+
+  /* ピラミッド */
+  .pyr{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:0 12px;margin-top:18px;align-items:center;}
+  .tier{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:700;border-radius:4px;margin:3px auto;padding:7px 0;}
+  .tier .lv{font-size:15px;}
+  .trk{font-size:12px;line-height:1.5;color:#333;}
+  .trk.l{text-align:right;} .trk.r{text-align:left;}
+  .trk b{color:var(--navy);}
+  .pyrtop{text-align:center;font-size:14px;color:var(--navy);font-weight:700;margin-top:14px;}
+
+  /* 内訳リスト */
+  .bd{list-style:none;margin-top:6px;}
+  .bd li{display:flex;justify-content:space-between;font-size:13.5px;padding:5px 0;border-bottom:1px solid #eef2f7;color:#333;}
+  .bd li b{color:var(--navy);}
+
+  .note{max-width:960px;margin:34px auto 0;font-size:12px;color:var(--grey);line-height:1.8;}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>通信業務 紹介プレゼン（他部門向け）統合ラフ</h1>
+  <p>担当者の原案 ＋ ここまでの構成を統合。<span class="ph">黄色</span>＝要確認。下部の灰色は「原案のどのスライド由来か」</p>
+</div>
+
+<div class="deck">
+
+  <!-- 1 表紙 -->
+  <div class="slide cover">
+    <div class="kicker" style="color:var(--accent)">PT福岡 / メンテナンス事業推進係　2026年6月</div>
+    <div class="title">通信担当の仕事と、<br>今期めざす2つの目標</div>
+    <div class="bar"></div>
+    <div class="sub">発表者：文倉</div>
+    <div class="src" style="color:#3a567a">原案 Slide1</div>
+  </div>
+
+  <!-- 2 アジェンダ -->
+  <div class="slide">
+    <div class="num">02</div>
+    <div class="kicker">AGENDA</div>
+    <div class="title">本日お話しすること</div>
+    <div class="agenda">
+      <div class="row"><span class="ic">📡</span><span class="t">通信担当の仕事 <small>何をしている人たちか</small></span></div>
+      <div class="row"><span class="ic">📊</span><span class="t">前期の振り返り <small>全国1位の実績</small></span></div>
+      <div class="row"><span class="ic">📈</span><span class="t">目標① 稼ぐ体制をつくる <small>115件・人を育てる</small></span></div>
+      <div class="row"><span class="ic">💰</span><span class="t">目標② 訪問サポートの有償化 <small>顧客請求・請求率30%へ</small></span></div>
+    </div>
+  </div>
+
+  <!-- 3 通信担当の仕事 -->
+  <div class="slide">
+    <div class="num">03</div>
+    <div class="kicker">WHO WE ARE</div>
+    <div class="title">通信担当は、何をしているか</div>
+    <div class="sub">※新人の方にも分かるよう、まず仕事の中身から</div>
+    <div class="body">
+      <ul>
+        <li>通信機器（眠りSCAN／眠りCONNECT）の<b>納品</b></li>
+        <li>納品した機器の<b>障害対応</b>（駆けつけ・復旧・リモート）</li>
+        <li>各種<b>連携</b>（カメラ・介護記録ソフト・ナースコール・インカム）</li>
+      </ul>
+    </div>
+    <div class="src">原案 Slide2 の連携内容を反映</div>
+  </div>
+
+  <!-- 4 前期の振り返り -->
+  <div class="slide">
+    <div class="num">04</div>
+    <div class="kicker">LAST TERM</div>
+    <div class="title">前期、私たちは全国1位でした</div>
+    <div class="stats">
+      <div class="stat"><div class="big">全国1<span class="unit">位</span></div><div class="lbl">CONNECT PT関与数</div></div>
+      <div class="stat"><div class="big">全国1<span class="unit">位</span></div><div class="lbl">通信売上 <span class="ph">2,400万円?</span></div></div>
+      <div class="stat"><div class="big">断トツ1<span class="unit">位</span></div><div class="lbl">連携関与数（カメラ・他社連携）</div></div>
+    </div>
+    <div class="body" style="font-size:13px;color:var(--grey);margin-top:18px"><span class="ph">実績グラフ／具体数値を貼り付け（原案の「実績貼り付け」枠）</span></div>
+    <div class="src">原案 Slide2</div>
+  </div>
+
+  <!-- 5 目標① 数字 + 補助金タイムライン -->
+  <div class="slide">
+    <div class="num">05</div>
+    <div class="kicker">GOAL ①</div>
+    <div class="title">今期は、もう一段上へ</div>
+    <div class="stats">
+      <div class="stat"><div class="big">3,150<span class="unit">万円</span></div><div class="lbl">今期 売上目標</div></div>
+      <div class="stat"><div class="big">115<span class="unit">件</span></div><div class="lbl">やり切るべき納品件数</div></div>
+    </div>
+    <div class="tl">
+      <div class="pt"><div class="dot"></div><div class="lbl">いま</div><div class="dsc">準備・助走</div></div>
+      <div class="ln"></div>
+      <div class="pt"><div class="dot hl"></div><div class="lbl">12月〜</div><div class="dsc">補助金スタート＝本格納品</div></div>
+      <div class="ln"></div>
+      <div class="pt"><div class="dot"></div><div class="lbl">今のペースなら</div><div class="dsc">全然間に合う</div></div>
+    </div>
+    <div class="src">本格化＝補助金（原案 Slide5「補助金納品」）＋ 今期目標</div>
+  </div>
+
+  <!-- 6 だから何が必要か -->
+  <div class="slide">
+    <div class="num">06</div>
+    <div class="kicker">SO, WHAT WE NEED</div>
+    <div class="title">115件をやり切るために</div>
+    <div class="flow">
+      <div class="step">115件の納品を<br>やり切る</div>
+      <div class="arrow">→</div>
+      <div class="step">通信専任者は<br>CONNECT納品に<br>専念する</div>
+      <div class="arrow">→</div>
+      <div class="step">障害対応を<br>メンバーが<br>できる状態に</div>
+    </div>
+    <div class="body" style="font-size:15px">そのために、<b>人を育てている</b>。＝次ページのキャリアプラン。</div>
+  </div>
+
+  <!-- 7 キャリアプラン ピラミッド -->
+  <div class="slide">
+    <div class="num">07</div>
+    <div class="kicker">CAREER PLAN ＝ ニュータイプ化</div>
+    <div class="title">全員が、通信もベッドも、上を目指す</div>
+    <div class="pyr">
+      <div class="trk l"><b>眠りSCAN（通信）</b><br>導入支援・リモート解決</div>
+      <div class="tier" style="width:42%;background:var(--navy)"><span class="lv">エキスパート</span></div>
+      <div class="trk r"><b>スマートベッド</b><br>導入支援・東西リーダー</div>
+
+      <div class="trk l">ヘルプデスク<br>リモート操作</div>
+      <div class="tier" style="width:62%;background:#1c4a73"><span class="lv">ミドル</span></div>
+      <div class="trk r">製品理解・<br>タッチ可</div>
+
+      <div class="trk l">故障切り分け<br>コネクト設置（連携）</div>
+      <div class="tier" style="width:82%;background:#3f78a0"><span class="lv">ベーシック</span></div>
+      <div class="trk r">障害一次対応<br>（選抜者）</div>
+
+      <div class="trk l">コネクト設置（基本）<br>障害一次対応</div>
+      <div class="tier" style="width:100%;background:var(--accent)"><span class="lv">エントリー</span></div>
+      <div class="trk r">製品理解・<br>タッチ可</div>
+    </div>
+    <div class="pyrtop">↑ PT福岡エリア担当 <b>全員が</b> 両方のエキスパートを目指す</div>
+    <div class="src">原案 Slide4（キャリアプラン図を整理）</div>
+  </div>
+
+  <!-- 8 勉強会 -->
+  <div class="slide">
+    <div class="num">08</div>
+    <div class="kicker">STUDY SESSION</div>
+    <div class="title">そのための、勉強会</div>
+    <div class="cols">
+      <div class="col"><h4>📖 毎週 月曜 13:00〜（1時間）</h4><p>眠りSCAN 通信勉強会を定例開催。納品・障害対応の現場同行とセットで、エリアサービスマンの<b>ベーシッククラス</b>を目指す。</p></div>
+      <div class="col"><h4>✅ スキルチェックシート</h4><p>各自のスキルレベルを可視化・把握。<b>補助金納品時は、外注を使わずPTのみで完結</b>できる状態へ。</p></div>
+    </div>
+    <div class="src">原案 Slide5</div>
+  </div>
+
+  <!-- 9 自己採点 -->
+  <div class="slide">
+    <div class="num">09</div>
+    <div class="kicker">SKILL CHECK</div>
+    <div class="title">メンバーは、ここまで仕上がっている</div>
+    <div class="sub">スキルチェックシートの自己採点 <span class="ph">数値は要確認</span></div>
+    <div style="margin-top:16px">
+      <div class="barrow"><div class="nm">通信機器の納品</div><div class="track"><div class="fill" style="width:90%"></div></div><div class="pct">90%</div></div>
+      <div class="barrow"><div class="nm">障害の一次対応</div><div class="track"><div class="fill" style="width:80%"></div></div><div class="pct">80%</div></div>
+      <div class="barrow"><div class="nm">ベッド修理</div><div class="track"><div class="fill" style="width:85%"></div></div><div class="pct">85%</div></div>
+      <div class="barrow"><div class="nm"><span class="ph">項目</span></div><div class="track"><div class="fill" style="width:60%"></div></div><div class="pct">60%</div></div>
+    </div>
+    <div class="src">原案 Slide5（チェックシート）＋ 自己採点データ</div>
+  </div>
+
+  <!-- 10 現場成果 -->
+  <div class="slide">
+    <div class="num">10</div>
+    <div class="kicker">RESULTS OF STUDY SESSION</div>
+    <div class="title">勉強会の成果が、現場にも出ている</div>
+    <div class="sub">スキルが上がったメンバーが、訪問先で実際に動けるようになってきた</div>
+    <div class="body" style="margin-top:14px">
+      <ul>
+        <li><b>ベッド修理</b>の訪問先で、<b>通信</b>のことをヒアリングできるようになってきた</li>
+        <li><b>通信対応</b>の訪問先で、<b>ベッド</b>のことをヒアリングできるようになってきた</li>
+      </ul>
+    </div>
+    <div class="cols" style="margin-top:16px">
+      <div class="col"><h4>具体トピックス ①</h4><p><span class="ph">実話を記入（例：ベッド修理先で通信の相談を受け、その場で対応／案件化）</span></p></div>
+      <div class="col"><h4>具体トピックス ②</h4><p><span class="ph">実話を記入（例：通信対応先でベッドの不具合に気づき拾えた）</span></p></div>
+    </div>
+    <div class="src">勉強会（08）・自己採点（09）の成果が、現場でも表れていることを示す</div>
+  </div>
+
+  <!-- 11 営業領域への拡大 -->
+  <div class="slide">
+    <div class="num">11</div>
+    <div class="kicker">STILL GOAL ①</div>
+    <div class="title">さらに、営業領域まで踏み込む</div>
+    <div class="sub">通信専任者が、納品に加えて営業領域（取扱説明など）も担う</div>
+    <div class="flow" style="margin-top:22px">
+      <div class="step">通信専任者が<br>取扱説明などを<br>請け負う</div>
+      <div class="arrow">→</div>
+      <div class="step">グループ内の<br>請求として<br>売上が立つ</div>
+      <div class="arrow">→</div>
+      <div class="step" style="background:var(--navy);color:#fff">売上金額が増え<br>3,150万円<br>達成への足しに</div>
+    </div>
+    <div class="body" style="font-size:13.5px;color:var(--grey);margin-top:20px">
+      ＜具体例＞ <b style="color:var(--navy)">取扱説明</b>はすでに台本を作成済み。※当面は通信専任者が担当。
+    </div>
+    <div class="src">原案 Slide6-7（PT領域の拡大・取説台本）</div>
+  </div>
+
+  <!-- 12 有償化① 現状 -->
+  <div class="slide">
+    <div class="num">12</div>
+    <div class="kicker">GOAL ② ／ 現状</div>
+    <div class="title">訪問サポートの有償化 ― ここまで来た</div>
+    <div class="sub">眠りSCAN 訪問サポートを、顧客請求できた実績</div>
+    <div style="display:flex;gap:28px;align-items:center;margin-top:16px">
+      <div style="flex:0 0 auto;text-align:center">
+        <svg width="170" height="170" viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="78" fill="none" stroke="#eef2f7" stroke-width="22"/>
+          <circle cx="100" cy="100" r="78" fill="none" stroke="var(--pale)" stroke-width="22" stroke-dasharray="147 343" transform="rotate(-90 100 100)"/>
+          <circle cx="100" cy="100" r="78" fill="none" stroke="var(--accent)" stroke-width="22" stroke-dasharray="109 381" transform="rotate(-90 100 100)"/>
+          <text x="100" y="94" text-anchor="middle" font-size="38" font-weight="800" fill="var(--navy)">22.2<tspan font-size="20">%</tspan></text>
+          <text x="100" y="116" text-anchor="middle" font-size="12" fill="var(--grey)">現状の請求率</text>
+        </svg>
+        <div style="font-size:12px;color:var(--grey);margin-top:4px">
+          <span style="display:inline-block;width:10px;height:10px;background:var(--accent);border-radius:2px"></span> 現状22.2% 
+          <span style="display:inline-block;width:10px;height:10px;background:var(--pale);border-radius:2px;margin-left:4px"></span> 目標30%
+        </div>
+        <div style="font-size:11px;color:var(--grey)"><span class="ph">%は要確認</span></div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;color:var(--navy);font-weight:700;margin-bottom:2px">顧客請求できた内訳（計10件）</div>
+        <ul class="bd">
+          <li><span>管理PC入替</span><b>3件</b></li>
+          <li><span>SCAN・カメラ移設／設定変更</span><b>4件</b></li>
+          <li><span>モバイル設定</span><b>1件</b></li>
+          <li><span>SCAN・カメラ通信障害</span><b>2件</b></li>
+        </ul>
+      </div>
+    </div>
+    <div class="src">原案 Slide9（顧客請求の内訳）</div>
+  </div>
+
+  <!-- 12b 有償化② 課題と対策 -->
+  <div class="slide">
+    <div class="num">13</div>
+    <div class="kicker">GOAL ② ／ 課題と対策</div>
+    <div class="title">前期まで無償。いま、切り替えの真っ最中</div>
+    <div class="sub">有償化はスタートして約2か月。30%へ向けた「立ち上げ期」の途中経過です</div>
+    <div style="display:flex;gap:22px;margin-top:16px">
+      <div style="flex:1">
+        <div style="font-size:13px;color:var(--navy);font-weight:700;margin-bottom:8px">現場のリアルな声 <span class="ph" style="font-size:11px">実際の声に差し替え</span></div>
+        <div style="background:var(--light);border-radius:10px;padding:12px 15px;font-size:13.5px;color:#333;margin-bottom:8px;line-height:1.6">「今まで無料だったのに、急に有料とは言いにくい…」</div>
+        <div style="background:var(--light);border-radius:10px;padding:12px 15px;font-size:13.5px;color:#333;line-height:1.6">「いくらと言えばいいか、その場で迷う」</div>
+      </div>
+      <div style="flex:1">
+        <div class="col"><h4>これからの詰め方</h4>
+          <p style="line-height:1.8">
+          ・下限 <b style="color:var(--navy)">@26,000円</b> のラインで合意を取る<br>
+          ・合意できなければ初回は無償、<b style="color:var(--navy)">次回以降は定額を必ず請求</b>すると初回に説明<br>
+          ・<span class="ph">その他の打ち手があれば</span>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="src">原案 Slide8（料金ルール）＋ 現場の声で「立ち上げ期の経過」として提示</div>
+  </div>
+
+  <!-- 14 まとめ -->
+  <div class="slide cover">
+    <div class="num" style="color:var(--pale)">14</div>
+    <div class="kicker" style="color:var(--accent)">SUMMARY</div>
+    <div class="title">まとめ</div>
+    <div class="bar"></div>
+    <div class="body" style="color:#fff;font-size:17px">
+      通信担当は、<b style="color:var(--accent)">①稼ぐ体制をつくり（115件・人を育てる）</b>、<b style="color:var(--accent)">②訪問サポートを有償化する</b>、この2つの目標で動いています。
+    </div>
+  </div>
+
+  <!-- 14 付録：納品時のお願い -->
+  <div class="slide" style="border:2px dashed #d9b441;">
+    <div class="num">付録</div>
+    <div class="kicker" style="color:#8a6d00">APPENDIX ／ 入れるか要判断</div>
+    <div class="title">（お願い）納品時のネットワーク情報</div>
+    <div class="body" style="font-size:14px">
+      納品後、納入先フォルダに<b>ネットワーク情報の格納</b>をお願いします。<br>
+      <ul style="margin-top:10px">
+        <li>無いと、保守施設でも次回以降は支店対応になってしまう</li>
+        <li>運用状況が分からず、障害対応の難易度が上がる</li>
+        <li>あれば、支店で故障確認・再設定して返却でき、訪問不要に</li>
+      </ul>
+    </div>
+    <div class="src" style="color:#8a6d00">原案 Slide10。本編（認知）とは筋が違うため、締めの後に独立のお願いとして配置。今回入れるか要判断。</div>
+  </div>
+
+</div>
+
+<div class="note">
+  <b>原案からの主な統合：</b> 前期は「他支店比較」→ 原案どおり<b>全国1位</b>（CONNECT関与数・通信売上・連携関与数）に格上げ。勉強会は<b>月曜13時・チェックシート・ベーシック目標</b>の実情報を反映。スキルトランスファーは原案の<b>キャリアプラン ピラミッド</b>を採用。有償化は<b>顧客請求10件の内訳と料金ルール</b>の実弾を投入。<br>
+  <b>要判断：</b>①前期の通信売上「2,400万」は全国1位の数値と整合するか確認。②自己採点(09)の%は実データに差し替え。③有償化の請求率%（現状22.2%は仮）。④付録の納品お願い（Slide10）を今回入れるか。
+</div>
+
+</body>
+</html>
