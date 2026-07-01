@@ -7,8 +7,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="棚卸チェック">
-<meta name="theme-color" content="#20262e">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%2320262e'/%3E%3Crect x='52' y='34' width='76' height='22' rx='8' fill='%235ad1a8'/%3E%3Crect x='44' y='66' width='92' height='12' rx='6' fill='%23ffffff'/%3E%3Crect x='44' y='90' width='92' height='12' rx='6' fill='%23ffffff'/%3E%3Cpath d='M56 128l16 16 32-34' stroke='%235ad1a8' stroke-width='12' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#3b5876">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%2320262e'/%3E%3Crect x='52' y='34' width='76' height='22' rx='8' fill='%23ffffff'/%3E%3Crect x='44' y='66' width='92' height='12' rx='6' fill='%23ffffff'/%3E%3Crect x='44' y='90' width='92' height='12' rx='6' fill='%23ffffff'/%3E%3Cpath d='M56 128l16 16 32-34' stroke='%23ffffff' stroke-width='12' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <title>棚卸チェック</title>
 <script>
 /*! xlsx.js (C) 2013-present SheetJS -- http://sheetjs.com */
@@ -41,7 +41,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     --ink:#171a1f; --ink-soft:#5b6472; --ink-faint:#8a95a3;
     --line:#e0e6ee;
     --panel:#20262e; --panel-2:#2b333d; --panel-line:#39424d;
-    --glow:#5ad1a8;
+    --glow:#ffffff;
     --match:#12855a; --match-bg:#e6f5ee; --match-line:#9fd9c1;
     --diff:#c2410c; --diff-bg:#fdeee6; --diff-line:#f0c3a3;
     --counted:#2563a8; --counted-bg:#eaf1fb; --counted-line:#bcd3ef;
@@ -210,6 +210,80 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .delta.up{color:var(--match);} .delta.down{color:var(--diff);}
   .arrow{color:var(--ink-faint);padding:0 3px;}
   @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+
+/* ===== restrained / low-color override ===== */
+:root{
+  --ink:#171a1e; --ink-soft:#5c636d; --ink-faint:#9aa1ab;
+  --line:#e6e8ec; --line-strong:#d2d6dd;
+  --surface:#ffffff; --surface-2:#f4f5f7; --bg:#edeff2;
+  --glow:#e9ecf1;
+  --match:#79818c; --match-bg:#f4f5f7; --match-line:#d6dae0;
+  --diff:#b13b34; --diff-bg:#f8ecea; --diff-line:#e6c3bf;
+  --counted:#6a737e; --counted-bg:#f4f5f7; --counted-line:#d6dae0;
+}
+/* header: neutral graphite kept, mint removed */
+.brand .dot{box-shadow:none; background:var(--glow); opacity:.85;}
+.readout .big{color:#eef1f5;}
+.bar > i{background:#c3ccd6;}
+.tally .m b{color:#eef1f5;} .tally .d b{color:#e29a92;} .tally .u b{color:#cfd5dc;}
+/* list rows: no colour fill, only a thin left marker; red reserved for 差異 */
+.item{border-color:var(--line);}
+.item.match{background:var(--surface); border-left-color:var(--line-strong);}
+.item.counted{background:var(--surface); border-left-color:var(--line-strong);}
+.item.diff{background:var(--surface); border-left-color:var(--diff);}
+.item.match .tag,.item.diff .tag,.item.counted .tag{background:var(--surface-2);}
+.name{color:var(--ink);}
+/* badges: quiet outline style */
+.diff-badge.match{color:var(--ink-soft); background:var(--surface-2); border:1px solid var(--line);}
+.diff-badge.counted{color:var(--ink-soft); background:var(--surface-2); border:1px solid var(--line);}
+.diff-badge.diff{color:var(--diff); background:var(--diff-bg); border:1px solid var(--diff-line);}
+/* presets neutral */
+.preset.theo{color:var(--ink); border-color:var(--line-strong); background:var(--surface-2);}
+.preset.zero{color:var(--ink); border-color:var(--line-strong); background:var(--surface-2);}
+.memo-btn.has{color:var(--ink-soft); border-color:var(--line-strong); background:var(--surface-2);}
+/* settings selected column */
+.colcheck.on{background:var(--panel); color:#fff; border-color:var(--panel);}
+/* history views */
+.rec-stats .ok{color:var(--ink-soft);}
+.rec-stats .bad{color:var(--diff);}
+.rb.match{color:var(--ink-soft); background:var(--surface-2);}
+.rb.counted{color:var(--ink-soft); background:var(--surface-2);}
+.rb.diff{color:var(--diff); background:var(--diff-bg); border:1px solid var(--diff-line);}
+.delta.up{color:var(--ink);} .delta.down{color:var(--diff);}
+
+/* ===== compact dense list (resembling the reference) ===== */
+header{padding-top:calc(var(--safe-t) + 10px); padding-bottom:10px;}
+.h-top{margin-bottom:10px;}
+.readout{margin-bottom:6px;} .readout .big{font-size:25px;}
+.bar{margin-bottom:8px;} .tally{margin-bottom:10px;} .chips{margin-top:9px;}
+main{padding:0; background:var(--surface);}
+.item{flex-direction:column; gap:0; background:var(--surface); border:none; border-bottom:1px solid var(--line); border-left:3px solid transparent; border-radius:0; margin:0; padding:8px 12px 8px 13px;}
+.item.diff{border-left-color:var(--diff);}
+.item.match,.item.counted{border-left-color:transparent;}
+.row-line{display:flex; align-items:center; gap:10px;}
+.labels{flex:1; min-width:0;}
+.name{font-size:14.5px; font-weight:600; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.meta{display:flex; flex-wrap:wrap; gap:3px 8px; margin-top:2px; align-items:center;}
+.code{font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); font-weight:600;}
+.theo-inline{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint);}
+.tag{font-size:11px; color:var(--ink-soft); background:var(--surface-2); border:1px solid var(--line); padding:1px 6px; border-radius:5px;}
+.qty-input{width:56px; height:38px; border:1.5px solid var(--line); border-radius:9px; border-left:1.5px solid var(--line); border-right:1.5px solid var(--line); text-align:center; font-family:var(--mono); font-size:17px; font-weight:700; color:var(--ink); background:var(--surface); outline:none; -webkit-appearance:none; flex:0 0 auto;}
+.qty-input:focus{border-color:var(--ink-soft);}
+.qty-input::placeholder{color:#c2cad6; font-weight:400; font-size:12px;}
+.diff-badge{margin-left:0; min-width:42px; text-align:center; font-family:var(--mono); font-weight:700; font-size:13px; padding:5px 6px; border-radius:8px;}
+.tools-btn{flex:0 0 auto; width:34px; height:34px; border-radius:9px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink-faint); font-size:18px; line-height:1; cursor:pointer; padding:0;}
+.tools-btn.has{color:var(--ink-soft); border-color:var(--line-strong);}
+.tools-btn:active{transform:scale(.94);}
+.tools{display:none; flex-wrap:wrap; gap:6px; padding:9px 0 3px;}
+.tools.open{display:flex;}
+.tchip{height:32px; padding:0 11px; border-radius:8px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); font-size:12.5px; font-weight:600; cursor:pointer;}
+.tchip:active{transform:scale(.96);}
+.memo-inline{flex:1 1 110px; min-width:110px; height:32px; border:1px solid var(--line); border-radius:8px; padding:0 9px; font-size:13px; background:var(--surface); outline:none;}
+.memo-inline:focus{border-color:var(--ink-soft);}
+.count,.stepper,.step-btn,.presets,.preset,.memo-row,.item-main,.memo-btn{display:none !important;}
+
+/* ===== header colour: slate blue ===== */
+:root{ --panel:#3b5876; --panel-2:#4a688a; --panel-line:#54739a; }
 </style>
 </head>
 <body>
@@ -246,10 +320,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 <div class="welcome" id="welcome">
   <div class="mark">
     <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
-      <rect x="52" y="30" width="76" height="22" rx="8" fill="#5ad1a8"/>
+      <rect x="52" y="30" width="76" height="22" rx="8" fill="#ffffff"/>
       <rect x="44" y="64" width="92" height="12" rx="6" fill="#fff"/>
       <rect x="44" y="88" width="92" height="12" rx="6" fill="#fff"/>
-      <path d="M56 128l16 16 32-34" stroke="#5ad1a8" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M56 128l16 16 32-34" stroke="#ffffff" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </div>
   <h1>棚卸チェック</h1>
@@ -483,58 +557,49 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     return true;
   }
 
+  function badgeText(st){ return st.k==="counted"?"確認": st.diff===0?"±0": (st.diff>0?"+":"")+fmt(st.diff); }
   function rowNode(row){
+    var theoVal = state.qtyCol? num(row[state.qtyCol]) : NaN;
     var el=document.createElement("div");
     el.className="item"+(row.__cat!=="unchecked"?" "+row.__cat:"");
     el.setAttribute("data-id", row.__id);
 
-    var main=document.createElement("div"); main.className="item-main";
+    // compact single line: labels | qty input | diff | tools toggle
+    var line=document.createElement("div"); line.className="row-line";
     var labels=document.createElement("div"); labels.className="labels";
     var nm=document.createElement("div"); nm.className="name"; nm.textContent=state.mainCol?(row[state.mainCol]||"（無題）"):"（列未設定）";
     labels.appendChild(nm);
     var meta=document.createElement("div"); meta.className="meta";
     if(state.subCol && String(row[state.subCol]||"").trim()!==""){ var cd=document.createElement("span"); cd.className="code"; cd.textContent=row[state.subCol]; meta.appendChild(cd); }
-    if(state.qtyCol && String(row[state.qtyCol]||"").trim()!==""){ var th=document.createElement("span"); th.className="tag theo"; th.textContent="理論 "+row[state.qtyCol]; meta.appendChild(th); }
-    state.extraCols.forEach(function(c){ var v=String(row[c]||"").trim(); if(v===""){return;} var t=document.createElement("span"); t.className="tag"; t.textContent=c+" "+v; meta.appendChild(t); });
+    if(state.qtyCol && String(row[state.qtyCol]||"").trim()!==""){ var th=document.createElement("span"); th.className="theo-inline"; th.textContent="理論 "+row[state.qtyCol]; meta.appendChild(th); }
+    state.extraCols.forEach(function(c){ var v=String(row[c]||"").trim(); if(v===""){return;} var t=document.createElement("span"); t.className="tag"; t.textContent=v; meta.appendChild(t); });
     if(meta.childNodes.length) labels.appendChild(meta);
-    main.appendChild(labels);
-    var mbtn=document.createElement("button"); mbtn.type="button"; mbtn.className="memo-btn"+(row.__memo?" has":""); mbtn.textContent="✎";
-    main.appendChild(mbtn); el.appendChild(main);
+    line.appendChild(labels);
 
-    // count row
-    var count=document.createElement("div"); count.className="count";
-    var stepper=document.createElement("div"); stepper.className="stepper";
-    var minus=document.createElement("button"); minus.type="button"; minus.className="step-btn"; minus.textContent="−";
     var input=document.createElement("input"); input.className="qty-input"; input.type="text"; input.inputMode="decimal"; input.placeholder="実数"; input.value=(row.__actual===""?"":row.__actual);
-    var plus=document.createElement("button"); plus.type="button"; plus.className="step-btn"; plus.textContent="+";
-    stepper.appendChild(minus); stepper.appendChild(input); stepper.appendChild(plus);
-    count.appendChild(stepper);
-    var badge=document.createElement("span"); badge.className="diff-badge"; count.appendChild(badge);
-    el.appendChild(count);
+    line.appendChild(input);
+    var badge=document.createElement("span"); badge.className="diff-badge"; line.appendChild(badge);
+    var toolsBtn=document.createElement("button"); toolsBtn.type="button"; toolsBtn.className="tools-btn"+(row.__memo?" has":""); toolsBtn.textContent="⋯";
+    line.appendChild(toolsBtn);
+    el.appendChild(line);
 
-    // presets
-    var presets=document.createElement("div"); presets.className="presets";
-    var theoBtn=document.createElement("button"); theoBtn.type="button"; theoBtn.className="preset theo";
-    var theoVal = state.qtyCol? num(row[state.qtyCol]) : NaN;
-    theoBtn.textContent = isNaN(theoVal)? "＝理論" : "＝理論 "+fmt(theoVal);
-    if(isNaN(theoVal)) theoBtn.style.display="none";
-    var zeroBtn=document.createElement("button"); zeroBtn.type="button"; zeroBtn.className="preset zero"; zeroBtn.textContent="在庫0";
-    var clrBtn2=document.createElement("button"); clrBtn2.type="button"; clrBtn2.className="preset clear"; clrBtn2.textContent="クリア";
-    presets.appendChild(theoBtn); presets.appendChild(zeroBtn); presets.appendChild(clrBtn2);
-    el.appendChild(presets);
-
-    var memoRow=document.createElement("div"); memoRow.className="memo-row"+(row.__memo?" open":"");
-    var mi=document.createElement("input"); mi.type="text"; mi.placeholder="メモ（差異理由など）"; mi.value=row.__memo||"";
-    memoRow.appendChild(mi); el.appendChild(memoRow);
+    // tools (revealed on demand): shortcuts + memo
+    var tools=document.createElement("div"); tools.className="tools";
+    var minus=document.createElement("button"); minus.type="button"; minus.className="tchip"; minus.textContent="−1";
+    var plus=document.createElement("button"); plus.type="button"; plus.className="tchip"; plus.textContent="+1";
+    var theoBtn=document.createElement("button"); theoBtn.type="button"; theoBtn.className="tchip"; theoBtn.textContent=isNaN(theoVal)?"＝理論":"＝理論 "+fmt(theoVal); if(isNaN(theoVal)) theoBtn.style.display="none";
+    var zeroBtn=document.createElement("button"); zeroBtn.type="button"; zeroBtn.className="tchip"; zeroBtn.textContent="在庫0";
+    var clrBtn2=document.createElement("button"); clrBtn2.type="button"; clrBtn2.className="tchip"; clrBtn2.textContent="クリア";
+    var mi=document.createElement("input"); mi.type="text"; mi.className="memo-inline"; mi.placeholder="メモ"; mi.value=row.__memo||"";
+    tools.appendChild(minus); tools.appendChild(plus); tools.appendChild(theoBtn); tools.appendChild(zeroBtn); tools.appendChild(clrBtn2); tools.appendChild(mi);
+    el.appendChild(tools);
 
     function apply(){
       var st=rowState(row); var cat=st.k;
       if(row.__cat!==cat){ counts[row.__cat]--; counts[cat]++; row.__cat=cat; }
       el.className="item"+(cat!=="unchecked"?" "+cat:"");
       if(cat==="unchecked"){ badge.style.display="none"; }
-      else if(cat==="counted"){ badge.style.display=""; badge.className="diff-badge counted"; badge.textContent="確認"; }
-      else if(st.diff===0){ badge.style.display=""; badge.className="diff-badge match"; badge.textContent="±0 一致"; }
-      else { badge.style.display=""; badge.className="diff-badge diff"; badge.textContent=(st.diff>0?"+":"")+fmt(st.diff); }
+      else { badge.style.display=""; badge.className="diff-badge "+cat; badge.textContent=badgeText(st); }
       renderStats(); save();
       if(state.filter!=="all" && cat!==state.filter){
         el.style.transition="opacity .18s"; el.style.opacity="0";
@@ -554,15 +619,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     theoBtn.addEventListener("click", function(){ if(!isNaN(theoVal)) setVal(theoVal); });
     zeroBtn.addEventListener("click", function(){ setVal(0); });
     clrBtn2.addEventListener("click", function(){ setVal(""); });
-    mbtn.addEventListener("click", function(){ memoRow.classList.toggle("open"); if(memoRow.classList.contains("open")) mi.focus(); });
-    mi.addEventListener("input", function(){ row.__memo=mi.value; mbtn.classList.toggle("has", !!mi.value); save(); });
+    toolsBtn.addEventListener("click", function(){ tools.classList.toggle("open"); });
+    mi.addEventListener("input", function(){ row.__memo=mi.value; toolsBtn.classList.toggle("has", !!mi.value); save(); });
 
-    // initialize badge state
     (function(){ var st=rowState(row);
       if(st.k==="unchecked"){ badge.style.display="none"; }
-      else if(st.k==="counted"){ badge.className="diff-badge counted"; badge.textContent="確認"; }
-      else if(st.diff===0){ badge.className="diff-badge match"; badge.textContent="±0 一致"; }
-      else { badge.className="diff-badge diff"; badge.textContent=(st.diff>0?"+":"")+fmt(st.diff); }
+      else { badge.className="diff-badge "+st.k; badge.textContent=badgeText(st); }
     })();
     return el;
   }
