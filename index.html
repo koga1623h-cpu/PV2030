@@ -324,13 +324,42 @@ main{padding:0; background:var(--surface);}
 
 /* ===== header colour: slate blue ===== */
 :root{ --panel:#3b5876; --panel-2:#4a688a; --panel-line:#54739a; }
+
+/* ---- warehouse switcher (header) ---- */
+.wh-switch{display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18); color:#fff; font-weight:700; font-size:15px;
+  padding:6px 12px; border-radius:999px; max-width:62%; cursor:pointer; -webkit-tap-highlight-color:transparent;}
+.wh-switch:active{background:rgba(255,255,255,.2);}
+.wh-switch .wh-dot{width:8px;height:8px;border-radius:50%;background:var(--glow);flex:0 0 auto;opacity:.9;}
+.wh-switch .wh-name{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.wh-switch .wh-caret{font-size:11px; opacity:.85; flex:0 0 auto;}
+
+/* ---- warehouse list sheet ---- */
+.wh-list{display:flex; flex-direction:column; gap:8px; margin:4px 0 2px;}
+.wh-row{display:flex; align-items:stretch; gap:6px; border:1px solid var(--line,#e6e8ec);
+  border-radius:12px; overflow:hidden; background:#fff;}
+.wh-row.cur{border-color:var(--panel); box-shadow:0 0 0 1px var(--panel) inset;}
+.wh-pick{flex:1; display:flex; align-items:center; gap:11px; padding:12px 12px; background:none;
+  border:none; text-align:left; cursor:pointer; -webkit-tap-highlight-color:transparent; min-width:0;}
+.wh-pick:active{background:#f4f6f9;}
+.wh-check{width:20px; flex:0 0 auto; color:var(--panel); font-weight:800; font-size:16px; text-align:center;}
+.wh-info{display:flex; flex-direction:column; gap:2px; min-width:0;}
+.wh-rname{font-weight:700; font-size:15px; color:#1c2530; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.wh-meta{font-size:12px; color:#8a929c;}
+.wh-mini{flex:0 0 auto; width:42px; border:none; border-left:1px solid var(--line,#eceef1);
+  background:#fafbfc; color:#5a6470; font-size:16px; cursor:pointer; -webkit-tap-highlight-color:transparent;}
+.wh-mini:active{background:#eef1f5;}
+.wh-mini.danger{color:#b3554f;}
+#whAddBtn{margin-top:4px;}
 </style>
 </head>
 <body>
 
 <header id="hdr" style="display:none">
   <div class="h-top">
-    <div class="brand"><span class="dot"></span>棚卸チェック</div>
+    <button class="wh-switch" id="whSwitch" type="button" aria-label="倉庫を切り替え">
+      <span class="wh-dot"></span><span class="wh-name" id="whNameLbl">倉庫</span><span class="wh-caret">▾</span>
+    </button>
     <button class="hpill" id="histBtn" style="margin-left:auto">履歴</button>
     <button class="gear" id="gearBtn" aria-label="設定" style="margin-left:8px">⚙︎</button>
   </div>
@@ -414,10 +443,10 @@ main{padding:0; background:var(--surface);}
 
     <div class="divider"></div>
     <div class="sheet-actions">
-      <button class="btn ghost" id="reloadBtn">別のExcelを読み込む</button>
+      <button class="btn ghost" id="reloadBtn">この倉庫を別のExcelに差し替え</button>
       <button class="btn ghost" id="csvBtn">CSVで書き出し</button>
       <button class="btn danger" id="resetBtn">入力結果だけ消す</button>
-      <button class="btn danger" id="wipeBtn">すべて消去（データも削除）</button>
+      <button class="btn danger" id="wipeBtn">この倉庫を削除</button>
     </div>
   </div>
 </div>
@@ -426,6 +455,17 @@ main{padding:0; background:var(--surface);}
   <div class="sheet full">
     <div class="grab"></div>
     <div id="histBody"></div>
+  </div>
+</div>
+
+<div class="scrim" id="whScrim">
+  <div class="sheet" id="whSheet">
+    <div class="grab"></div>
+    <h2>倉庫の切り替え</h2>
+    <p class="sub">読み込んだExcelは倉庫ごとに保存されます。実数の入力やメモは倉庫ごとに独立して残ります。</p>
+    <div class="wh-list" id="whList"></div>
+    <div class="divider"></div>
+    <button class="btn primary wide" id="whAddBtn">＋ 倉庫を追加（Excelを読み込む）</button>
   </div>
 </div>
 
@@ -448,11 +488,13 @@ main{padding:0; background:var(--surface);}
 <script>
 (function(){
   "use strict";
-  var STORE_KEY = "tanaoroshi_state_v2";
-  var HIST_KEY  = "tanaoroshi_history_v2";
+  var STORE_KEY = "tanaoroshi_state_v2";   // legacy (single dataset) — migrated to a warehouse on first run
+  var HIST_KEY  = "tanaoroshi_history_v2"; // legacy history
+  var WH_INDEX  = "tanaoroshi_wh_index_v1"; // [{id,name}]
+  var WH_CUR    = "tanaoroshi_wh_cur_v1";   // current warehouse id
 
   var state = {
-    fileName:"", wb:null, sheetNames:[], sheetName:"",
+    whId:"", fileName:"", wb:null, sheetNames:[], sheetName:"",
     headers:[], rows:[],
     mainCol:"", subCol:"", qtyCol:"", extraCols:[],
     filter:"all", search:""
@@ -468,28 +510,72 @@ main{padding:0; background:var(--surface);}
   function fmt(n){ return Number.isInteger(n)? String(n) : String(Math.round(n*1000)/1000); }
   function pad(n){return n<10?"0"+n:""+n;}
 
+  // ---------- warehouse store ----------
+  function whSlotKey(id){ return "tanaoroshi_wh_"+id+"_v1"; }
+  function whHistKey(id){ return "tanaoroshi_hist_"+id+"_v1"; }
+  function whNewId(){ return "w"+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36); }
+  function whGetIndex(){ try{ var a=JSON.parse(localStorage.getItem(WH_INDEX)); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function whSetIndex(a){ try{ localStorage.setItem(WH_INDEX, JSON.stringify(a)); }catch(e){} }
+  function whReadSlot(id){ try{ return JSON.parse(localStorage.getItem(whSlotKey(id))); }catch(e){ return null; } }
+  function whName(id){ var ix=whGetIndex(); for(var i=0;i<ix.length;i++) if(ix[i].id===id) return ix[i].name; return ""; }
+  function whSetName(id,nm){ var ix=whGetIndex(); for(var i=0;i<ix.length;i++) if(ix[i].id===id){ ix[i].name=nm; break; } whSetIndex(ix); }
+  function whAdd(id,name){ var ix=whGetIndex(); ix.push({id:id,name:name}); whSetIndex(ix); }
+  function whStats(id){
+    var d = (id===state.whId) ? state : whReadSlot(id);
+    if(!d||!d.rows) return {total:0,done:0};
+    var total=d.rows.length, done=0;
+    for(var i=0;i<d.rows.length;i++){ var a=d.rows[i].__actual; if(a!==""&&a!=null&&!isNaN(num(a))) done++; }
+    return {total:total, done:done};
+  }
+  function defaultWhName(fileName){
+    var base=(fileName||"倉庫").replace(/\.[^.]+$/,"").trim() || "倉庫";
+    var names={}; whGetIndex().forEach(function(w){names[w.name]=1;});
+    if(!names[base]) return base;
+    for(var n=2;n<999;n++){ if(!names[base+"("+n+")"]) return base+"("+n+")"; }
+    return base;
+  }
+
   // ---------- persistence ----------
   var saveTimer;
   function saveNow(){
+    if(!state.whId) return;
     try{
-      localStorage.setItem(STORE_KEY, JSON.stringify({
+      localStorage.setItem(whSlotKey(state.whId), JSON.stringify({
         fileName:state.fileName, sheetName:state.sheetName, headers:state.headers,
         mainCol:state.mainCol, subCol:state.subCol, qtyCol:state.qtyCol, extraCols:state.extraCols,
         rows: state.rows
       }));
+      localStorage.setItem(WH_CUR, state.whId);
     }catch(e){}
   }
   function save(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveNow, 350); }
-  function restore(){
-    try{
-      var d=JSON.parse(localStorage.getItem(STORE_KEY));
-      if(!d||!d.rows||!d.rows.length) return false;
-      state.fileName=d.fileName||""; state.sheetName=d.sheetName||""; state.headers=d.headers||[];
-      state.mainCol=d.mainCol||""; state.subCol=d.subCol||""; state.qtyCol=d.qtyCol||""; state.extraCols=d.extraCols||[];
-      state.rows=d.rows;
-      state.rows.forEach(function(r){ if(r.__actual==null) r.__actual=""; if(r.__memo==null) r.__memo=""; });
-      return true;
-    }catch(e){ return false; }
+
+  function applySlot(id){
+    var d=whReadSlot(id); if(!d||!d.rows||!d.rows.length) return false;
+    state.whId=id; state.wb=null;
+    state.fileName=d.fileName||""; state.sheetName=d.sheetName||"";
+    state.sheetNames=d.sheetName?[d.sheetName]:[];
+    state.headers=d.headers||[]; state.mainCol=d.mainCol||""; state.subCol=d.subCol||"";
+    state.qtyCol=d.qtyCol||""; state.extraCols=d.extraCols||[];
+    state.filter="all"; state.search="";
+    state.rows=d.rows;
+    state.rows.forEach(function(r){ if(r.__actual==null) r.__actual=""; if(r.__memo==null) r.__memo=""; });
+    return true;
+  }
+  function updateWhLabel(){ var el=$("whNameLbl"); if(el) el.textContent = whName(state.whId) || "倉庫"; }
+
+  function migrateLegacy(){
+    if(whGetIndex().length>0) return;
+    var old=null; try{ old=JSON.parse(localStorage.getItem(STORE_KEY)); }catch(e){}
+    if(old && old.rows && old.rows.length){
+      var id=whNewId();
+      try{ localStorage.setItem(whSlotKey(id), JSON.stringify(old)); }catch(e){}
+      whAdd(id, "倉庫1");
+      localStorage.setItem(WH_CUR, id);
+      var oh=null; try{ oh=JSON.parse(localStorage.getItem(HIST_KEY)); }catch(e){}
+      if(Array.isArray(oh)&&oh.length){ try{ localStorage.setItem(whHistKey(id), JSON.stringify(oh)); }catch(e){} }
+      try{ localStorage.removeItem(STORE_KEY); localStorage.removeItem(HIST_KEY); }catch(e){}
+    }
   }
 
   var toastTimer;
@@ -549,15 +635,21 @@ main{padding:0; background:var(--surface);}
     }
     state.headers=headers; state.rows=rows;
   }
-  function handleFile(file){
+  var fileMode="add"; // "add" = create a new warehouse, "replace" = replace current warehouse's data
+  function handleFile(file, mode){
     var reader=new FileReader();
     reader.onload=function(e){
       try{
         var wb=XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+        if(mode==="add" || !state.whId){
+          var nid=whNewId();
+          whAdd(nid, defaultWhName(file.name));
+          state.whId=nid;
+        }
         state.wb=wb; state.fileName=file.name; state.sheetNames=wb.SheetNames.slice();
         loadSheet(wb.SheetNames[0]);
         if(!state.rows.length){ toast("データ行が見つかりませんでした"); return; }
-        autoConfig(); recount(); saveNow(); showData(); buildList();
+        autoConfig(); recount(); saveNow(); updateWhLabel(); showData(); buildList();
         toast(state.rows.length+"件 読み込みました");
         if(!state.qtyCol){ setTimeout(function(){ openSheet(); toast("理論在庫の列を選んでください"); }, 500); }
       }catch(err){ toast("読み込みに失敗しました"); }
@@ -565,15 +657,79 @@ main{padding:0; background:var(--surface);}
     reader.readAsArrayBuffer(file);
   }
   fileInput.addEventListener("change", function(){
-    var f=fileInput.files&&fileInput.files[0]; if(!f) return;
-    if(state.rows.length && (counts.match+counts.diff+counts.counted)>0){
-      if(!confirm("現在の入力結果を破棄して新しいファイルを読み込みますか？")){ fileInput.value=""; return; }
+    var f=fileInput.files&&fileInput.files[0]; if(!f){ return; }
+    var mode=fileMode; fileMode="add";
+    if(mode==="replace" && state.rows.length && (counts.match+counts.diff+counts.counted)>0){
+      if(!confirm("この倉庫の入力結果を破棄して、別のExcelに差し替えますか？")){ fileInput.value=""; return; }
     }
-    handleFile(f); fileInput.value="";
+    handleFile(f, mode); fileInput.value="";
   });
   function pickFile(){ fileInput.click(); }
-  $("loadBtn0").addEventListener("click", pickFile);
-  $("reloadBtn").addEventListener("click", function(){ closeSheet(); pickFile(); });
+  $("loadBtn0").addEventListener("click", function(){ fileMode="add"; pickFile(); });
+  $("reloadBtn").addEventListener("click", function(){ fileMode="replace"; closeSheet(); pickFile(); });
+
+  // ---------- warehouse switching UI ----------
+  var whScrim=$("whScrim");
+  function openWh(){ renderWhList(); whScrim.classList.add("open"); }
+  function closeWh(){ whScrim.classList.remove("open"); }
+  function renderWhList(){
+    var ix=whGetIndex(), html="";
+    ix.forEach(function(w){
+      var st=whStats(w.id), isCur=w.id===state.whId;
+      var pct=st.total?Math.round(st.done/st.total*100):0;
+      html+='<div class="wh-row'+(isCur?' cur':'')+'">'
+        +'<button class="wh-pick" data-act="pick" data-id="'+w.id+'">'
+        +'<span class="wh-check">'+(isCur?'✓':'')+'</span>'
+        +'<span class="wh-info"><span class="wh-rname">'+esc(w.name)+'</span>'
+        +'<span class="wh-meta">'+st.done+' / '+st.total+' 件　'+pct+'%</span></span></button>'
+        +'<button class="wh-mini" data-act="rename" data-id="'+w.id+'" aria-label="名前を変更">✎</button>'
+        +'<button class="wh-mini danger" data-act="del" data-id="'+w.id+'" aria-label="削除">✕</button>'
+        +'</div>';
+    });
+    $("whList").innerHTML=html;
+  }
+  function chipsToAll(){
+    var chipEls=document.querySelectorAll(".chip-f");
+    for(var i=0;i<chipEls.length;i++) chipEls[i].classList.toggle("on", chipEls[i].getAttribute("data-f")==="all");
+  }
+  function switchWarehouse(id){
+    if(id===state.whId){ closeWh(); return; }
+    saveNow();
+    if(!applySlot(id)){ toast("倉庫を開けませんでした"); return; }
+    localStorage.setItem(WH_CUR, id);
+    if(searchInput){ searchInput.value=""; clrBtn.style.display="none"; }
+    chipsToAll();
+    recount(); updateWhLabel(); showData(); buildList(); listEl.scrollTop=0;
+    closeWh(); closeSheet();
+    toast(whName(id)+" に切り替えました");
+  }
+  function renameWarehouse(id){
+    var nm=prompt("倉庫の名前を入力", whName(id)); if(nm==null) return;
+    nm=nm.trim(); if(!nm) return;
+    whSetName(id, nm); if(id===state.whId) updateWhLabel(); renderWhList();
+  }
+  function deleteWarehouse(id){
+    var ix=whGetIndex();
+    if(ix.length<=1){ toast("最後の倉庫は削除できません"); return; }
+    if(!confirm("倉庫「"+whName(id)+"」を削除します。\nこの倉庫の入力結果と履歴も消えます。よろしいですか？")) return;
+    ix=ix.filter(function(w){return w.id!==id;}); whSetIndex(ix);
+    try{ localStorage.removeItem(whSlotKey(id)); localStorage.removeItem(whHistKey(id)); }catch(e){}
+    if(id===state.whId){
+      var nid=ix[0].id;
+      if(applySlot(nid)){ localStorage.setItem(WH_CUR,nid); chipsToAll(); recount(); updateWhLabel(); showData(); buildList(); }
+    }
+    renderWhList();
+  }
+  $("whSwitch").addEventListener("click", openWh);
+  $("whAddBtn").addEventListener("click", function(){ fileMode="add"; pickFile(); });
+  whScrim.addEventListener("click", function(e){ if(e.target===whScrim) closeWh(); });
+  $("whList").addEventListener("click", function(e){
+    var b=e.target.closest("[data-act]"); if(!b) return;
+    var act=b.getAttribute("data-act"), id=b.getAttribute("data-id");
+    if(act==="pick") switchWarehouse(id);
+    else if(act==="rename") renameWarehouse(id);
+    else if(act==="del") deleteWarehouse(id);
+  });
 
   // ---------- state model ----------
   function rowState(row){
@@ -748,10 +904,17 @@ main{padding:0; background:var(--surface);}
     state.rows.forEach(function(r){ r.__actual=""; r.__memo=""; }); recount(); saveNow(); buildList(); closeSheet(); toast("入力をリセットしました");
   });
   $("wipeBtn").addEventListener("click", function(){
-    if(!confirm("読み込んだデータと入力結果をすべて削除しますか？元に戻せません。")) return;
-    localStorage.removeItem(STORE_KEY);
-    state.rows=[]; state.headers=[]; state.fileName=""; state.wb=null; state.sheetNames=[];
-    counts={match:0,diff:0,counted:0,unchecked:0}; closeSheet(); showWelcome();
+    var id=state.whId; if(!id) return;
+    var ix=whGetIndex();
+    if(ix.length<=1){
+      if(!confirm("この倉庫「"+whName(id)+"」を削除します。\n入力結果と履歴も消え、最初の画面に戻ります。よろしいですか？")) return;
+      ix=ix.filter(function(w){return w.id!==id;}); whSetIndex(ix);
+      try{ localStorage.removeItem(whSlotKey(id)); localStorage.removeItem(whHistKey(id)); localStorage.removeItem(WH_CUR); }catch(e){}
+      state.whId=""; state.rows=[]; state.headers=[]; state.fileName=""; state.wb=null; state.sheetNames=[];
+      counts={match:0,diff:0,counted:0,unchecked:0}; updateWhLabel(); closeSheet(); showWelcome();
+    }else{
+      closeSheet(); deleteWarehouse(id);
+    }
   });
 
   // ---------- export ----------
@@ -799,8 +962,8 @@ main{padding:0; background:var(--surface);}
 
   // ---------- history ----------
   function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
-  function loadHistory(){ try{ var a=JSON.parse(localStorage.getItem(HIST_KEY)); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
-  function storeHistory(a){ localStorage.setItem(HIST_KEY, JSON.stringify(a)); }
+  function loadHistory(){ if(!state.whId) return []; try{ var a=JSON.parse(localStorage.getItem(whHistKey(state.whId))); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function storeHistory(a){ if(!state.whId) return; localStorage.setItem(whHistKey(state.whId), JSON.stringify(a)); }
   function recStateOf(it, cfg){
     if(it._a===""||it._a==null) return {k:"unchecked"};
     var a=num(it._a); if(isNaN(a)) return {k:"unchecked"};
@@ -1090,7 +1253,20 @@ main{padding:0; background:var(--surface);}
   if(scanClose) scanClose.addEventListener("click", closeScanner);
 
   // ---------- init ----------
-  if(restore()){ recount(); showData(); buildList(); } else { showWelcome(); }
+  migrateLegacy();
+  (function initWarehouses(){
+    var ix=whGetIndex();
+    if(!ix.length){ showWelcome(); return; }
+    var cur=localStorage.getItem(WH_CUR), okId=null;
+    if(cur && whReadSlot(cur)) okId=cur;
+    else { for(var i=0;i<ix.length;i++){ if(whReadSlot(ix[i].id)){ okId=ix[i].id; break; } } }
+    if(okId && applySlot(okId)){
+      localStorage.setItem(WH_CUR, okId);
+      chipsToAll(); recount(); updateWhLabel(); showData(); buildList();
+    } else {
+      showWelcome();
+    }
+  })();
 })();
 </script>
 </body>
